@@ -3,6 +3,7 @@ node_modules
 /dist
 /others
 /zsocket-mocks/build
+/src/router/index-local.ts
 
 # local env files
 .env.local
