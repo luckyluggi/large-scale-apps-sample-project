@@ -17,9 +17,8 @@
 	import { 
 		SocketClient, 
 		ISocketClientArgs, 
-		ISocketClientMessage, 
-		ISocketServerMessage 
-	} from '@/models/sockets/ISocketClient'
+		ISocketMessage
+	} from '@/models/sockets'
 	import { IItem } from '@/models/items/IItem'
 	import { IQueue } from '@/models/queue/IQueue'
 	import ItemsListComponent from '@/components/items/ItemsList.component.vue'
@@ -36,41 +35,66 @@
 		private count: number = 0
 		private socketClient!: SocketClient
 		private keywords: string = 'javascript'
+		private socketNamespace: string = 'mock'
+		private messageType: string = 'mock-queue'
 
 		private jobQueueModel: IQueue = {
 			name: '',
+			description: '',
 			items: []
 		}
 
 		mounted() {
 			const socketClientArgs: ISocketClientArgs = {
-				url: 'http://127.0.0.1:3100/mock',
+				url: `http://127.0.0.1:3100/${ this.socketNamespace }`,
 				onServerMessage: this.onServerMessage
 			}
 
 			this.socketClient = new SocketClient(socketClientArgs)
 		}
 
-		private onServerMessage(response: ISocketServerMessage<any>) {
+		private sendMessageToServer<T>(args: {
+			action: string,
+			ack: string,
+			model: T
+		}) {
+			this.socketClient.send({
+				namespace: this.socketNamespace,
+				type: this.messageType,
+				action: args.action,
+				ack: args.ack || '',
+				model: args.model || {}
+			})
+		}
+
+		private sendActionToServer(action: string) {
+			this.sendMessageToServer({
+				action: action,
+				ack: '',
+				model: {}
+			})
+		}
+
+		private onServerMessage(response: ISocketMessage<any>) {
 			console.log('About view: onServerMessage', typeof response)
-			const resp = (typeof response === 'string' ? JSON.parse(response) : response)
-			const data = resp.data
+			const resp: ISocketMessage<any> = (typeof response === 'string' ? JSON.parse(response) : response)
+			const model: any = resp.model;
 
 			// on item
 			switch (resp.type)
 			{
 				case 'item': {
-					const max = 10
+					const max = 10;
 					if (this.items.length > max) {
-						this.items.splice(0, 1);
+						this.items.splice(0, 1)
 					}
-					this.items.push(data)
-					break;
+					this.items.push(model as IItem)
+					break
 				}
 
-				case 'queue': {
-					console.log('reveiced jobQueue data', data)
-					this.jobQueueModel = data
+				case 'mock-queue': {
+					//console.log('reveiced jobQueue model', model);
+					this.jobQueueModel = model as IQueue;
 					break;
 				}
 
@@ -81,23 +105,19 @@
 		}
 
 		onStartStream() {
-			const message: ISocketClientMessage<any> = {
-				type: 'start-stream',
-				data: {
+			console.log('onStartStream')
+			this.sendMessageToServer<any>({
+				action: 'start-stream', 
+				ack: '',
+				model: {
 					keywords: this.keywords
-				}
-			}
-			console.log('onStartStream', message)
-			this.socketClient.send<any>(message)
+				} as any
+			})
 		}
 
 		onStopStream() {
-			const message: ISocketClientMessage<any> = {
-				type: 'stop-stream',
-				data: {}
-			}
-			console.log('onStopStream', message)
-			this.socketClient.send<any>(message)
+			console.log('onStopStream')
+			this.sendActionToServer('stop-stream')
 		}
 
 		onItemAction(params: {

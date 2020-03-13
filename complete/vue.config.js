@@ -1,5 +1,7 @@
 const path = require('path');
-const WebpackPluginMockSocketServer = require('./zsocket-mocks/WebpackPluginMockSocketServer.js');
+//const WebpackPluginMockSocketServer = require('./zsocket-mocks/WebpackPluginMockSocketServer.js');
+const WebpackPluginMockSocketServer = require('./zsocket-mocks/build/zsocket-mocks/source/WebpackPluginMockSocketServer.js')
+	.default;
 
 module.exports = {
 	devServer: {

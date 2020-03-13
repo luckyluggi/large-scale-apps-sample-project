@@ -2,6 +2,7 @@
 node_modules
 /dist
 /others
+/zsocket-mocks/build
 
 # local env files
 .env.local

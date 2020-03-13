@@ -1,15 +1,5 @@
 import * as SocketIo from 'socket.io-client'
-
-export interface ISocketServerMessage<T> {
-	namespace: string
-	type: string
-	data: T
-}
-
-export interface ISocketClientMessage<T> {
-	type: string
-	data: T
-}
+import { ISocketMessage } from './ISocketMessage'
 
 export interface ISocketClientArgs {
 	url: string
@@ -31,9 +21,8 @@ export class SocketClient {
 		}
 	}
 
-	send<T>(message: ISocketClientMessage<T>) {
+	send<T>(message: ISocketMessage<T>) {
 		console.log('SocketClient: send client-message', JSON.stringify(message))
         this.socket.emit('client-message', message)
     }
 }
-

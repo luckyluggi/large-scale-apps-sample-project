@@ -9,7 +9,9 @@
 		"test:unit": "vue-cli-service test:unit",
 		"lint": "vue-cli-service lint",
 		"stub-api-client": "plop --plopfile ./zgen/api-client/api-client-plop.js",
-		"stub-store-module": "plop --plopfile ./zgen/state/state-plop.js"
+		"stub-store-module": "plop --plopfile ./zgen/state/state-plop.js",
+		"build-zsocket-mocks": "tsc -p ./zsocket-mocks/",
+		"watch-zsocket-mocks": "tsc -p ./zsocket-mocks/ -w"
 	},
 	"dependencies": {
 		"axios": "^0.19.2",

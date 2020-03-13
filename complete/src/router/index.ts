@@ -2,6 +2,7 @@ import Vue from 'vue'
 import VueRouter from 'vue-router'
 import Home from '../views/Home.vue'
 import SocketsPlayground from '../views/SocketsPlayground.vue'
+import QueuePlayground from '../views/QueuePlayground.vue'
 
 Vue.use(VueRouter)
 
@@ -23,6 +24,11 @@ const routes = [
 		path: '/sockets',
 		name: 'SocketsPlayground',
 		component: SocketsPlayground
+	},
+	{
+		path: '/queue',
+		name: 'QueuePlayground',
+		component: QueuePlayground
 	},
 ]
 

@@ -1,0 +1,30 @@
+{
+	"compilerOptions": {
+		"target": "esnext",
+		"module": "commonjs",
+		"strict": true,
+		"moduleResolution": "node",
+		"esModuleInterop": true,
+		"outDir": "./build/",
+		"sourceMap": false,
+		"baseUrl": "."
+		/*"paths": {
+			"@/*": [
+				"../src/*"
+			]
+		},
+		"lib": [
+			"esnext",
+			"dom",
+			"dom.iterable",
+			"scripthost"
+		]*/
+	},
+	"include": [
+		"./source/**/*.ts"
+	],
+	"exclude": [
+		"../src/*",
+		"build"
+	]
+}
