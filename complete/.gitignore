@@ -4,6 +4,7 @@ node_modules
 /others
 /zsocket-mocks/build
 /src/router/index-local.ts
+/src/App-local.vue
 
 # local env files
 .env.local
