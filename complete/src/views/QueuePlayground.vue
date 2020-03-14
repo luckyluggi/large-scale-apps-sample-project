@@ -84,6 +84,7 @@
 			model: T
 		}) {
 			this.socketClient.send({
+				clientId: this.socketClient.id,
 				namespace: this.socketNamespace,
 				type: this.messageType,
 				action: args.action,

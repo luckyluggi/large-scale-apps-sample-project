@@ -11,7 +11,15 @@ export interface ISocketClient {
 }
 
 export class SocketClient {
-	private socket: any;
+	private socket: any
+
+	get id(): string {
+		if (this.socket) {
+			return this.socket.io.engine.id
+		} else {
+			return ''
+		}
+	}
 
 	constructor(args: ISocketClientArgs) {
 		if (!this.socket) {
@@ -22,7 +30,7 @@ export class SocketClient {
 	}
 
 	send<T>(message: ISocketMessage<T>) {
-		console.log('SocketClient: send client-message', JSON.stringify(message))
+		//console.log('SocketClient: send client-message', JSON.stringify(message))
         this.socket.emit('client-message', message)
     }
 }

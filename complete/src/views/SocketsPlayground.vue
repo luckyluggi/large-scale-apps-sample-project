@@ -8,7 +8,12 @@
 		</div>
 		<ItemsListComponent :items="items" />
 
-		<QueuePanelComponent :model="jobQueueModel" />
+		<div class="canvases">
+			<CanvasComponent ref="canvasComponent" class="client" @userDraw="onUserDraw" />
+		</div>
+
+		<div class="progress-bar" :style="progressStyle"></div>
+		<div class="data" :text="progressText"></div>
 	</div>
 </template>
 
@@ -20,14 +25,13 @@
 		ISocketMessage
 	} from '@/models/sockets'
 	import { IItem } from '@/models/items/IItem'
-	import { IQueue } from '@/models/queue/IQueue'
 	import ItemsListComponent from '@/components/items/ItemsList.component.vue'
-	import QueuePanelComponent from '@/components/queue/QueuePanel.component.vue'
+	import CanvasComponent, { ICanvasComponent, ICanvasDrawInfo } from '@/components/canvas/Canvas.component.vue'
 
 	@Component({
 		components: {
 			ItemsListComponent,
-			QueuePanelComponent
+			CanvasComponent
 		}
 	})
     export default class SocketsPlayground extends Vue {
@@ -36,19 +40,33 @@
 		private socketClient!: SocketClient
 		private keywords: string = 'javascript'
 		private socketNamespace: string = 'mock'
-		private messageType: string = 'mock-queue'
+		private messageType: string = 'canvas-stream'
 
-		private jobQueueModel: IQueue = {
-			name: '',
-			description: '',
-			items: []
+		private progressStyle: {
+			height: string
+			width: string
+			color: string
+		} = {
+			height: '8px',
+			width: '10%',
+			color: 'green'
+		}
+
+		private get progressText(): string {
+			return ''
+		}
+
+		private get refCanvasComponent(): ICanvasComponent {
+			return (this.$refs as any).canvasComponent as ICanvasComponent
 		}
 
 		mounted() {
 			const socketClientArgs: ISocketClientArgs = {
-				url: `http://127.0.0.1:3100/${ this.socketNamespace }`,
+				url: `http://192.168.1.12:3100/${ this.socketNamespace }`,
 				onServerMessage: this.onServerMessage
 			}
+
+			console.log('socketClientArgs', socketClientArgs)
 
 			this.socketClient = new SocketClient(socketClientArgs)
 		}
@@ -59,6 +77,7 @@
 			model: T
 		}) {
 			this.socketClient.send({
+				clientId: this.socketClient.id,
 				namespace: this.socketNamespace,
 				type: this.messageType,
 				action: args.action,
@@ -76,10 +95,12 @@
 		}
 
 		private onServerMessage(response: ISocketMessage<any>) {
-			console.log('About view: onServerMessage', typeof response)
+			//console.log('About view: onServerMessage', typeof response)
 			const resp: ISocketMessage<any> = (typeof response === 'string' ? JSON.parse(response) : response)
-			const model: any = resp.model;
-
+			const ack: any = resp.ack
+			const model: any = resp.model
+			//console.log('my client', this.socketClient.id, 'other client', resp.clientId)
+			
 			// on item
 			switch (resp.type)
 			{
@@ -92,16 +113,29 @@
 					break
 				}
 
-				case 'mock-queue': {
-					//console.log('reveiced jobQueue model', model);
-					this.jobQueueModel = model as IQueue;
-					break;
+				case 'canvas-stream': {
+					//console.log('About view: canvas-stream: onServerMessage: model', model)
+					if (resp.clientId !== this.socketClient.id) {
+						console.log('other client', resp.clientId)
+						resp.model.strokeStyle = 'orange'
+						this.refCanvasComponent.draw(resp.model)
+					}
+					//this.progressStyle.width = `${model.progress}%`
+					break
 				}
 
 				default: {
 					console.log('unhandled resp type', resp.type)
 				}
 			}
+		}
+
+		private onUserDraw(canvasDrawInfo: ICanvasDrawInfo) {
+			this.sendMessageToServer<ICanvasDrawInfo>({
+				action: 'draw',
+				ack: '',
+				model: canvasDrawInfo
+			})
 		}
 
 		onStartStream() {
@@ -134,3 +168,17 @@
 		}
 	}
 </script>
+
+<style lang="scss">
+	.progress-bar {
+		height: 8px;
+		width: 10%;
+		background-color: green;
+		outline: solid 1px lightgray;;
+	}
+
+	.canvases {
+		display: grid;
+		grid-template-columns: 50% 50%;;
+	}
+</style>

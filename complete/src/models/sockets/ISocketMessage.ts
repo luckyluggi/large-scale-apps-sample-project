@@ -1,4 +1,5 @@
 export interface ISocketMessage<T> {
+	clientId: string
 	namespace: string
 	type: string
 	action: string
